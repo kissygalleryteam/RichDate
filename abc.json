@@ -1,0 +1,14 @@
+{
+    "name": "RichDate",
+    "version": "1.0",
+    "desc": "",
+    "cover": "",
+    "tag":"date,util",
+    "author": {
+        "name": "hongshu",
+        "email": "tiehang.lth@taobao.com",
+        "page": ""
+    },
+    "type": "kissy-gallery",
+    "type-url": "http://gallery.kissyui.com/guide"
+}
