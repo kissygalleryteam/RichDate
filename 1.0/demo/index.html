@@ -28,8 +28,10 @@
         });
     }
 
-    S.use('gallery/RichDate/1.0/index', function (S, RichDate) {
-          new RichDate();
+    S.use('gallery/RichDate/1.0/index', function (S) {
+
+        var t1 = new Date(2013, 8, 12);
+        console.log(t1.ago());
     })
 </script>
 </body>

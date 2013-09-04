@@ -3,7 +3,7 @@
  * @author hongshu<tiehang.lth@taobao.com>
  * @module RichDate
  **/
-KISSY.add(function (S, Base) {
+KISSY.add(function (S) {
     var EMPTY = '';
     var $ = Node.all;
 
@@ -14,42 +14,53 @@ KISSY.add(function (S, Base) {
     S.mix(Date, {
 
         /**
-         * parse given date string
+         * parse given date string with the given pattern
+         * @param pattern desired time pattern, e.g.'YYYY-MM-DD hh:mm:ss'
          */
-        parse: function(){
+        parse: function(pattern){
 
         },
 
         /**
          * format date object to given format string
+         * @param pattern desired time pattern, e.g.'YYYY-MM-DD hh:mm:ss'
          */
-        format: function(){
+        format: function(pattern){
 
         }
     });
 
-    S.extend(Date, Base, /** @lends Date.prototype*/{
-        
+    /**
+     * mix Date instance with util functions
+     */
+    S.mix(Date.prototype, {
+
+        /**
+         * get specified time before the time
+         * @param time e.g.'2Y','2M','2D','2h','2m','2s'
+         */
+        before: function(time){
+            console.log(time);
+        },
+
+        /**
+         * get specified time after the time
+         * @param time e.g.'2Y','2M','2D','2h','2m','2s'
+         */
+        after: function(time){
+            console.log(time);
+        },
+
+        /**
+         * get the time has lasted to now
+         */
+        ago: function(){
+            var now = S.now();
+            return now - this.getTime();
+        }
     });
 
-    /**
-     * 
-     * @class RichDate
-     * @constructor
-     * @extends Base
-     */
-    function RichDate(comConfig) {
-        var self = this;
-        //调用父类构造函数
-        RichDate.superclass.constructor.call(self, comConfig);
-    }
-    S.extend(RichDate, Base, /** @lends RichDate.prototype*/{
-
-    }, {ATTRS : /** @lends RichDate*/{
-
-    }});
-    return RichDate;
-}, {requires:['base']});
+});
 
 
 

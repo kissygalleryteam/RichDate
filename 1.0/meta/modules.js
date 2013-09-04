@@ -1,3 +1,3 @@
 config({
-    'gallery/RichDate/index': {requires: ['base']}
+    'gallery/RichDate/index': {requires: []}
 });
