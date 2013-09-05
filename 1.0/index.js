@@ -26,6 +26,15 @@ KISSY.add(function (S) {
         second: 0
     };
 
+    var agoMsgMap = {
+        'Y': '年前',
+        'M': '个月前',
+        'D': '天前',
+        'h': '小时前',
+        'm': '分钟前',
+        's': '秒前'
+    };
+
     // range map for different unit, date should be decided by isLeapYear
     var rangeMap = {
         year: [1, 9999],
@@ -36,7 +45,12 @@ KISSY.add(function (S) {
         second: [0, 60]
     };
 
-    function transFormat(date){
+    /**
+     * transform given date object to formatted date object
+     * @param date
+     * @returns {{year: number, month: number, date: number, hour: number, minute: number, second: number}}
+     */
+    function dateToFormatted(date){
         return {
             year: date.getFullYear(),
             month: date.getMonth() + 1,
@@ -44,7 +58,25 @@ KISSY.add(function (S) {
             hour: date.getHours(),
             minute: date.getHours(),
             second: date.getSeconds()
+        };
+    }
+
+    function formattedToDate(formattedObj){
+        return new Date(formattedObj.year, formattedObj.month-1, formattedObj.date,
+            formattedObj.hour, formattedObj.minute, formattedObj.second);
+    }
+
+    /**
+     * check if given year is leap year
+     * @param year number
+     * @returns {boolean}
+     */
+    function isLeapYear(year){
+
+        if((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)){
+            return true;
         }
+        return false;
     }
 
     /**
@@ -55,7 +87,7 @@ KISSY.add(function (S) {
     function isValidDate (obj){
 
         var valid = true;
-        obj.isLeapYear = Date.isLeapYear(obj.year);
+        obj.isLeapYear = isLeapYear(obj.year);
 
         var maxDate = 31;
         if(S.inArray(obj.month, MONTH_30_DAYS)){
@@ -73,7 +105,53 @@ KISSY.add(function (S) {
                 return false;
             }
         });
-        return valid && new Date(obj.year, obj.month-1, obj.date, obj.hour, obj.minute, obj.second);
+        return valid && formattedToDate(obj);
+    }
+
+    /**
+     * execute date shift(before, after) according to given gap and direction(before/after)
+     * @param dateObj the given date object
+     * @param interval string, e.g.'2Y','22M','222D','2222h','222m','22s' with their combinations
+     * @param direction boolean (true: after, false: before)
+     * @returns {*}
+     */
+    function dateShift(dateObj, interval, direction){
+
+        var formatObj = dateToFormatted(dateObj);
+        var gapReg = /^((\d)+[YMDhms]{1})+$/;
+
+        // check if interval matches defined pattern
+        if(S.isString(interval) && gapReg.test(interval)){
+
+            // child regexp for filter every interval item, such as '12Y'
+            var matchReg = /(\d)+[YMDhms]{1}/g;
+
+            var matchArr;
+            while((matchArr = matchReg.exec(interval)) !=null){
+
+                console.log(matchArr);
+                // arr[0]为单次的全匹配结果
+                var matchedGap = matchArr[0];
+                // filter number and unit
+                var gapValue = parseInt(matchedGap);
+                var gapUnit = matchedGap[matchedGap.length - 1];
+
+                if(direction){
+                    // true: after
+                    formatObj[SIGNS[gapUnit]] += gapValue;
+                }else{
+                    // false: before
+                    formatObj[SIGNS[gapUnit]] -= gapValue;
+                }
+
+            }
+
+            return formattedToDate(formatObj);
+
+        }else{
+            S.error("invalid interval string, please set as '2Y','2M','2D','2h','2m','2s' with their combination!");
+        }
+
     }
 
 
@@ -82,18 +160,7 @@ KISSY.add(function (S) {
      */
     S.mix(Date, {
 
-        /**
-         * check if given year is leap year
-         * @param year
-         * @returns {boolean}
-         */
-        isLeapYear : function(year){
-
-            if((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)){
-                return true;
-            }
-            return false;
-        },
+        agoMsgMap: agoMsgMap,
 
         /**
          * parse given date string by the given pattern
@@ -111,7 +178,7 @@ KISSY.add(function (S) {
 
             if(str && pattern){
                 // i pointer for pattern & j pointer for str
-                for(var i = 0, j = 0; (i < pattern.length) && valValidFlag; i++, j++){
+                for(var i = 0, j = 0, len = pattern.length; (i < len) && valValidFlag; i++, j++){
 
                     var pa = pattern[i];
                     var st = str[j];
@@ -173,35 +240,44 @@ KISSY.add(function (S) {
     S.mix(Date.prototype, {
 
         /**
-         * get specified time before the time
-         * @param timegap e.g.'2Y','2M','2D','2h','2m','2s'
+         * check if current year is leap year
+         * @returns {boolean}
          */
-        before: function(timegap){
-            console.log(timegap);
+        isLeapYear: function(){
+            return isLeapYear(this.getFullYear());
+        },
+
+        /**
+         * get specified time before the time
+         * @param interval e.g.'2Y','2M','2D','2h','2m','2s'
+         */
+        before: function(interval){
+
+            return dateShift(this, interval, false);
         },
 
         /**
          * get specified time after the time
-         * @param timegap e.g.'2Y','2M','2D','2h','2m','2s'
+         * @param interval e.g.'2Y','22M','222D','2222h','222m','22s' with their combinations
          */
-        after: function(timegap){
+        after: function(interval){
 
-            var formatObj = transFormat(this);
-            var gapReg = /^((\d)+[YMDhms]{1})+/;
+            return dateShift(this, interval, true);
 
-            if(S.isString(timegap) && timegap.match(gapReg)){
-                console.log('Hello');
-            }
-
-            console.log(timegap);
         },
 
         /**
-         * get the time has lasted to now
+         * get the time has lasted until now
          */
         ago: function(){
-            var now = S.now();
-            return now - this.getTime();
+
+            var interval = S.now() - this.getTime();
+            if(interval > 0){
+
+            }else{
+                S.log('The time has not come yet!');
+                return false;
+            }
         },
 
         /**
@@ -214,17 +290,17 @@ KISSY.add(function (S) {
 
             var isLeadingZero = arguments[1] || false;
 
-            var timeObj = transFormat(this);
+            var timeObj = dateToFormatted(this);
             var toStr = '';
 
             if(S.isString(pattern)){
                 for(var i = 0; (i < pattern.length); i++){
                     var pa = pattern[i];
                     if(S.inArray(pa, SIGNS_KEYS)){
+
                         if(pa == 'Y' && pattern[i + 1] == 'Y' && pattern[i + 2] == 'Y' && pattern[i + 3] == 'Y'){
 
                             toStr += timeObj.year;
-
                             i += 3;
                         }else if(pa == pattern[i + 1]){
 
@@ -236,12 +312,14 @@ KISSY.add(function (S) {
                             }
 
                             toStr += val;
-
                             i++;
+
                         }else{
+
                             toStr += pa;
                         }
                     }else{
+
                         toStr += pa;
                     }
                 }
