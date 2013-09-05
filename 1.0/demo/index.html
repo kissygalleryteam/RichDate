@@ -32,6 +32,12 @@
 
         var t1 = new Date(2013, 8, 12);
         console.log(t1.ago());
+
+        var t2 = Date.parseBy('2012Year7Month5 1:2)', 'YYYYYearMMMonthDD hh:mm');
+        console.log(t2.toLocaleString());
+        console.log(t2.formatAs('YYYY year MM month DD date hh 点 mm minute ss second', true));
+
+        console.log(t2.after('2Y2D'));
     })
 </script>
 </body>
