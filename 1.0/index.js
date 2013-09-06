@@ -52,6 +52,11 @@ KISSY.add(function (S) {
         };
     }
 
+    /**
+     * transform formatted date object back to js date object
+     * @param formattedObj
+     * @returns {Date}
+     */
     function formattedToDate(formattedObj){
         return new Date(formattedObj.year, formattedObj.month-1, formattedObj.date,
             formattedObj.hour, formattedObj.minute, formattedObj.second);

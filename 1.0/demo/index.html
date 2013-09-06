@@ -31,7 +31,7 @@
     S.use('gallery/RichDate/1.0/index', function (S) {
 
         var t1 = new Date(2013, 7, 12);
-        console.log(t1.ago());
+        console.log(t1.after('1Y1M').toLocaleString());
 
         var t2 = Date.parseBy('2012Year7Month5 1:2-17)', 'YYYYYearMMMonthDD hh:mm-ss');
         console.log(t2.toLocaleString());
@@ -39,6 +39,10 @@
 
         console.log(t2.after('2Y2M1200m2400s').toLocaleString());
         console.log(t2.before('2Y2M1200m1600s').toLocaleString());
+
+        var t3 = Date.parseBy('2013Year 9Month7 1:2-17)', 'YYYYYear MMMonthDD hh:mm-ss');
+        console.log(t3.toLocaleString());
+        console.log(t3.formatAs('YYYY year MM month DD date hh 点 mm minute ss second', true))
     })
 </script>
 </body>
