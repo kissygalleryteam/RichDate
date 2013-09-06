@@ -209,17 +209,21 @@ KISSY.add(function (S) {
 
                     // if trans value error || string doesn't match pattern
                     if(!valValidFlag || pa != st){
-                        result = false;
-                        S.error(errorMsg);
+                        S.log(errorMsg);
                         return false;
                     }
 
                 }
 
-                return isValidDate(formatObj) || S.error(errorMsg);
+                result = isValidDate(formatObj);
+                if(!result){
+                    S.log(errorMsg);
+                }
+
+                return result;
             }
 
-            S.error(errorMsg);
+            S.log(errorMsg);
             return false;
         }
 

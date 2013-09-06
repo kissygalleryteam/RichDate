@@ -12,8 +12,6 @@
 <script>
     var S = KISSY;
 
-    S.Config.debug = true;
-
     if (S.Config.debug) {
         var srcPath = "../../../";
         S.config({
@@ -42,7 +40,10 @@
 
         var t3 = Date.parseBy('2013Year 9Month7 1:2-17)', 'YYYYYear MMMonthDD hh:mm-ss');
         console.log(t3.toLocaleString());
-        console.log(t3.formatAs('YYYY year MM month DD date hh 点 mm minute ss second', true))
+        console.log(t3.formatAs('YYYY year MM month DD date hh 点 mm minute ss second', true));
+        console.log(t3.isLeapYear());
+        var t4 = t3.after('3Y');
+        console.log(t4.isLeapYear());
     })
 </script>
 </body>
