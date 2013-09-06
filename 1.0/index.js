@@ -26,15 +26,6 @@ KISSY.add(function (S) {
         second: 0
     };
 
-    var agoMsgMap = {
-        'Y': '年前',
-        'M': '个月前',
-        'D': '天前',
-        'h': '小时前',
-        'm': '分钟前',
-        's': '秒前'
-    };
-
     // range map for different unit, date should be decided by isLeapYear
     var rangeMap = {
         year: [1, 9999],
@@ -129,7 +120,6 @@ KISSY.add(function (S) {
             var matchArr;
             while((matchArr = matchReg.exec(interval)) !=null){
 
-                console.log(matchArr);
                 // arr[0]为单次的全匹配结果
                 var matchedGap = matchArr[0];
                 // filter number and unit
@@ -159,8 +149,6 @@ KISSY.add(function (S) {
      * mix Date with util functions
      */
     S.mix(Date, {
-
-        agoMsgMap: agoMsgMap,
 
         /**
          * parse given date string by the given pattern
@@ -264,20 +252,6 @@ KISSY.add(function (S) {
 
             return dateShift(this, interval, true);
 
-        },
-
-        /**
-         * get the time has lasted until now
-         */
-        ago: function(){
-
-            var interval = S.now() - this.getTime();
-            if(interval > 0){
-
-            }else{
-                S.log('The time has not come yet!');
-                return false;
-            }
         },
 
         /**
