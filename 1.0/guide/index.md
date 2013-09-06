@@ -32,16 +32,16 @@ e.g：表示2年3个月15天8小时42分36秒：'2Y3M15D8h42m36s'
 * formatAs: function(pattern/\*, isLeadingZero\*/)
     * 根据指定的pattern对date对象进行格式化输出，返回输出的字符串
     * 备注：isLeadingZero为可选参数，表示是否输出前导零，默认不输出
-    * 调用方式：date.formatAs(pattern)
+    * 调用方式：dateObj.formatAs(pattern)
 
 * before: function(interval)
     * 根据指定的时间间隔字符串interval计算之前的某个时间点，比如'2Y2M'，2年2个月前，返回对应的时间点date对象
-    * 调用方式：var t2 = t1.before(interval);
+    * 调用方式：dateObj.before(interval)
 
 * after: function(interval)
     * 与before对应，计算将来的某个时间点
-    * 调用方式：var t2 = t1.after(interval);
+    * 调用方式：dateObj.after(interval)
 
 * isLeapYear: function()
     * 校验当前date对象是否为闰年，返回boolean
-    * 调用方式：date.isLeapYear();
+    * 调用方式：dateObj.isLeapYear()
