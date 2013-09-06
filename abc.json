@@ -1,13 +1,13 @@
 {
     "name": "RichDate",
     "version": "1.0",
-    "desc": "",
+    "desc": "基于Kissy对Date对象和原型的扩展",
     "cover": "",
     "tag":"date,util",
     "author": {
         "name": "hongshu",
         "email": "tiehang.lth@taobao.com",
-        "page": ""
+        "page": "https://github.com/dickeylth"
     },
     "type": "kissy-gallery",
     "type-url": "http://gallery.kissyui.com/guide"

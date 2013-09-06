@@ -177,9 +177,8 @@ KISSY.add(function (S) {
 
                     if(S.inArray(pa, SIGNS_KEYS)){
 
-                        if(pa == 'Y' && pattern.charAt(i + 1) == 'Y' && pattern.charAt(i + 2) == 'Y' && pattern.charAt(i + 3) == 'Y'){
-
-                            // if(pattern.substring(i,4) == 'YYYY')
+                        // check if pa and following 3 chars match 'YYYY'
+                        if(pattern.substr(i, 4) == 'YYYY'){
 
                             // deal with year
                             var year = parseInt(str.substr(j, 4));
@@ -282,7 +281,8 @@ KISSY.add(function (S) {
                     var pa = pattern.charAt(i);
                     if(S.inArray(pa, SIGNS_KEYS)){
 
-                        if(pa == 'Y' && pattern.charAt(i + 1) == 'Y' && pattern.charAt(i + 2) == 'Y' && pattern.charAt(i + 3) == 'Y'){
+                        // check if matches 'YYYY'
+                        if(pattern.substr(i, 4) == 'YYYY'){
 
                             toStr += formatObj.year;
                             i += 3;
