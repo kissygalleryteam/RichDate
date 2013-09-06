@@ -1,6 +1,6 @@
 ## 综述
 
-RichDate是基于Kissy的对Date对象及原型进行扩展的工具组件，方便对时间的操作。
+RichDate是基于Kissy的对Date对象及原型进行增强的工具组件，方便对时间的操作。
 
 * 版本：1.0
 * 作者：hongshu<tiehang.lth@taobao.com>
