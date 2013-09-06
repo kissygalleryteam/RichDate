@@ -47,7 +47,7 @@ KISSY.add(function (S) {
             month: date.getMonth() + 1,
             date: date.getDate(),
             hour: date.getHours(),
-            minute: date.getHours(),
+            minute: date.getMinutes(),
             second: date.getSeconds()
         };
     }
@@ -172,12 +172,14 @@ KISSY.add(function (S) {
                 // i pointer for pattern & j pointer for str
                 for(var i = 0, j = 0, len = pattern.length; (i < len) && valValidFlag; i++, j++){
 
-                    var pa = pattern[i];
-                    var st = str[j];
+                    var pa = pattern.charAt(i);
+                    var st = str.charAt(j);
 
                     if(S.inArray(pa, SIGNS_KEYS)){
 
-                        if(pa == 'Y' && pattern[i + 1] == 'Y' && pattern[i + 2] == 'Y' && pattern[i + 3] == 'Y'){
+                        if(pa == 'Y' && pattern.charAt(i + 1) == 'Y' && pattern.charAt(i + 2) == 'Y' && pattern.charAt(i + 3) == 'Y'){
+
+                            // if(pattern.substring(i,4) == 'YYYY')
 
                             // deal with year
                             var year = parseInt(str.substr(j, 4));
@@ -190,7 +192,7 @@ KISSY.add(function (S) {
                                 continue;
                             }
 
-                        }else if(pa == pattern[i + 1]){
+                        }else if(pa == pattern.charAt(i + 1)){
 
                             // deal with others
                             var val = parseInt(str.substr(j, 2));
@@ -272,21 +274,21 @@ KISSY.add(function (S) {
 
             var isLeadingZero = arguments[1] || false;
 
-            var timeObj = dateToFormatted(this);
+            var formatObj = dateToFormatted(this);
             var toStr = '';
 
             if(S.isString(pattern)){
                 for(var i = 0; (i < pattern.length); i++){
-                    var pa = pattern[i];
+                    var pa = pattern.charAt(i);
                     if(S.inArray(pa, SIGNS_KEYS)){
 
-                        if(pa == 'Y' && pattern[i + 1] == 'Y' && pattern[i + 2] == 'Y' && pattern[i + 3] == 'Y'){
+                        if(pa == 'Y' && pattern.charAt(i + 1) == 'Y' && pattern.charAt(i + 2) == 'Y' && pattern.charAt(i + 3) == 'Y'){
 
-                            toStr += timeObj.year;
+                            toStr += formatObj.year;
                             i += 3;
-                        }else if(pa == pattern[i + 1]){
+                        }else if(pa == pattern.charAt(i + 1)){
 
-                            var val = timeObj[SIGNS[pa]];
+                            var val = formatObj[SIGNS[pa]];
 
                             // add leading zero
                             if(isLeadingZero && (val < 10)){
