@@ -54,12 +54,11 @@ KISSY.add(function (S) {
 
     /**
      * transform formatted date object back to js date object
-     * @param formattedObj
+     * @param fo formatted date object
      * @returns {Date}
      */
-    function formattedToDate(formattedObj){
-        return new Date(formattedObj.year, formattedObj.month-1, formattedObj.date,
-            formattedObj.hour, formattedObj.minute, formattedObj.second);
+    function formattedToDate(fo){
+        return new Date(fo.year, fo.month-1, fo.date, fo.hour, fo.minute, fo.second);
     }
 
     /**
@@ -191,7 +190,6 @@ KISSY.add(function (S) {
                                 continue;
                             }
 
-
                         }else if(pa == pattern[i + 1]){
 
                             // deal with others
@@ -237,6 +235,7 @@ KISSY.add(function (S) {
          * @returns {boolean}
          */
         isLeapYear: function(){
+
             return isLeapYear(this.getFullYear());
         },
 
