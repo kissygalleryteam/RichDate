@@ -6,8 +6,12 @@
 
 ## changelog
 
+### V1.1
+
+    [!]兼容Kissy 1.2
+
 ### V1.0
 
-    [!]
+    [!]对Date对象及其原型的扩展API：parseBy、formatAs、before、after、isLeapYear
 
 

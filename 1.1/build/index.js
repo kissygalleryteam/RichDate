@@ -1,16 +1,15 @@
 /*
 combined files : 
 
-gallery/RichDate/1.0/index
+gallery/RichDate/1.1/index
 
 */
 /**
  * @fileoverview 
- * @author hongshu<tiehang.lth@taobao.com>
+ * @author 弘树<tiehang.lth@taobao.com>
  * @module RichDate
  **/
-KISSY.add('gallery/RichDate/1.0/index',function (S) {
-    var EMPTY = '';
+KISSY.add('gallery/RichDate/1.1/index',function (S) {
 
     var MONTH_30_DAYS = [4, 6, 9, 11];
     var SIGNS = {
