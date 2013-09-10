@@ -1,18 +1,16 @@
 /*
 combined files : 
 
-gallery/RichDate/1.0/index
+gallery/RichDate/1.1/index
 
 */
 /**
  * @fileoverview 
- * @author hongshu<tiehang.lth@taobao.com>
+ * @author 弘树<tiehang.lth@taobao.com>
  * @module RichDate
  **/
-KISSY.add('gallery/RichDate/1.0/index',function (S) {
-    var EMPTY = '';
+KISSY.add('gallery/RichDate/1.1/index',function (S) {
 
-    var MONTH_30_DAYS = [4, 6, 9, 11];
     var SIGNS = {
         'Y': 'year',
         'M': 'month',
@@ -37,16 +35,6 @@ KISSY.add('gallery/RichDate/1.0/index',function (S) {
         hour: 0,
         minute: 0,
         second: 0
-    };
-
-    // range map for different unit, date should be decided by isLeapYear
-    var rangeMap = {
-        year: [1, 9999],
-        month: [1, 12],
-        date: [1, 31],
-        hour: [0, 60],
-        minute: [0, 60],
-        second: [0, 60]
     };
 
     /**
@@ -94,26 +82,15 @@ KISSY.add('gallery/RichDate/1.0/index',function (S) {
      */
     function isValidDate (obj){
 
-        var valid = true;
-        obj.isLeapYear = isLeapYear(obj.year);
-
-        var maxDate = 31;
-        if(S.inArray(obj.month, MONTH_30_DAYS)){
-            maxDate = 30;
-        }else if(obj.month == 2){
-            maxDate = obj.isLeapYear ? 29 : 28;
+        var toDateObj = formattedToDate(obj);
+        if((toDateObj.getFullYear() != obj.year) || (toDateObj.getMonth() != obj.month - 1)
+            || (toDateObj.getDate() != obj.date) || (toDateObj.getHours() != obj.hour)
+            || (toDateObj.getMinutes() != obj.minute) || (toDateObj.getSeconds() != obj.second)){
+            return false;
+        }else{
+            return toDateObj;
         }
 
-        // reset rangeMap's date range according to maxDate
-        rangeMap.date[1] = maxDate;
-
-        S.each(rangeMap, function(range, key){
-            if(range[0] > obj[key] || range[1] < obj[key]){
-                valid = false;
-                return false;
-            }
-        });
-        return valid && formattedToDate(obj);
     }
 
     /**
@@ -212,7 +189,7 @@ KISSY.add('gallery/RichDate/1.0/index',function (S) {
                                 valValidFlag = false;
                             }else{
                                 formatObj[SIGNS[pa]] = val;
-                                (str[j] == '0') && j++; // fix leading zero auto apply
+                                (str[j] == '0' || val >= 10) && j++; // fix leading zero auto apply
                                 i++;
                                 continue;
                             }
