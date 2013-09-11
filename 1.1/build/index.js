@@ -264,42 +264,22 @@ KISSY.add('gallery/RichDate/1.1/index',function (S) {
             var isLeadingZero = arguments[1] || false;
 
             var formatObj = dateToFormatted(this);
-            var toStr = '';
 
-            if(S.isString(pattern)){
-                for(var i = 0; (i < pattern.length); i++){
-                    var pa = pattern.charAt(i);
-                    if(S.inArray(pa, SIGNS_KEYS)){
-
-                        // check if matches 'YYYY'
-                        if(pattern.substr(i, 4) == 'YYYY'){
-
-                            toStr += formatObj.year;
-                            i += 3;
-                        }else if(pa == pattern.charAt(i + 1)){
-
-                            var val = formatObj[SIGNS[pa]];
-
-                            // add leading zero
-                            if(isLeadingZero && (val < 10)){
-                                val = '0' + val;
-                            }
-
-                            toStr += val;
-                            i++;
-
-                        }else{
-
-                            toStr += pa;
-                        }
-                    }else{
-
-                        toStr += pa;
-                    }
-                }
+            function fillZero(val){
+                return (val < 10) ? ('0' + val) : val;
+            }
+            if(isLeadingZero){
+                S.each(formatObj, function(val, key){
+                    formatObj[key] = fillZero(val);
+                })
             }
 
-            return toStr;
+            return pattern.replace('YYYY', formatObj.year)
+                .replace('MM', formatObj.month)
+                .replace('DD', formatObj.date)
+                .replace('hh', formatObj.hour)
+                .replace('mm', formatObj.minute)
+                .replace('ss', formatObj.second);
 
         }
     });
