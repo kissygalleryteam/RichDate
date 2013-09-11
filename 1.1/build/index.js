@@ -77,19 +77,21 @@ KISSY.add('gallery/RichDate/1.1/index',function (S) {
 
     /**
      * check if given formatted object is valid date
+     * using date auto convert to compare before & after is equal
      * @param obj formatted object
      * @returns {boolean|Date}
      */
-    function isValidDate (obj){
+    function isValidDate(obj){
 
         var toDateObj = formattedToDate(obj);
-        if((toDateObj.getFullYear() != obj.year) || (toDateObj.getMonth() != obj.month - 1)
-            || (toDateObj.getDate() != obj.date) || (toDateObj.getHours() != obj.hour)
-            || (toDateObj.getMinutes() != obj.minute) || (toDateObj.getSeconds() != obj.second)){
-            return false;
-        }else{
+
+        // KISSY's hidden api: equals[https://github.com/kissyteam/kissy/blob/master/src/seed/src/lang/lang.js]
+        if(S.equals(dateToFormatted(toDateObj), obj)){
+            // two hash object equals, valid date
             return toDateObj;
         }
+
+        return false;
 
     }
 
