@@ -6,20 +6,17 @@
 KISSY.add(function (S) {
 
     var SIGNS = {
-        'Y': 'year',
-        'M': 'month',
-        'D': 'date',
-        'h': 'hour',
-        'm': 'minute',
-        's': 'second'
+        'YYYY': 'year',
+        'MM': 'month',
+        'DD': 'date',
+        'hh': 'hour',
+        'mm': 'minute',
+        'ss': 'second'
     };
-    var SIGNS_KEYS = [];
-    if(S.keys){
-        SIGNS_KEYS = S.keys(SIGNS);
-    }else{
-        S.each(SIGNS, function(item, idx){
-            SIGNS_KEYS.push(idx);
-        });
+
+    // process relate mapping for such as 'YYYY->Y->year', 'MM->m->month'
+    function convertSign(unit){
+        return SIGNS[unit+unit] || SIGNS['YYYY'];
     }
 
     var formatObj = {
@@ -115,13 +112,14 @@ KISSY.add(function (S) {
                 // filter number and unit
                 var gapValue = parseInt(matchedGap);
                 var gapUnit = matchedGap[matchedGap.length - 1];
+                var relKey = convertSign(gapUnit);
 
                 if(direction){
                     // true: after
-                    formatObj[SIGNS[gapUnit]] += gapValue;
+                    formatObj[relKey] += gapValue;
                 }else{
                     // false: before
-                    formatObj[SIGNS[gapUnit]] -= gapValue;
+                    formatObj[relKey] -= gapValue;
                 }
 
             }
@@ -140,8 +138,28 @@ KISSY.add(function (S) {
      */
     S.mix(Date, {
 
+
+        parseStr: function(str/*, pattern*/){
+
+            str = S.trim(str);
+            var pattern = arguments[1] || 'YYYY-MM-DD hh:mm:ss';
+            var map = {
+
+            };
+
+            var yearIdx = pattern.indexOf('YYYY'),
+                monthIdx = pattern.indexOf('MM'),
+                dateIdx = pattern.indexOf('DD'),
+                hourIdx = pattern.indexOf('hh'),
+                minuteIdx = pattern.indexOf('mm'),
+                secondIdx = pattern.indexOf('ss');
+
+
+        },
+
         /**
          * parse given date string by the given pattern
+         * ie native support date string rule: http://msdn.microsoft.com/zh-cn/library/ie/ff743760(v=vs.94).aspx
          * @param str given date string
          * @param pattern desired time pattern, e.g.'YYYY-MM-DD hh:mm:ss'
          */
@@ -161,7 +179,7 @@ KISSY.add(function (S) {
                     var pa = pattern.charAt(i);
                     var st = str.charAt(j);
 
-                    if(S.inArray(pa, SIGNS_KEYS)){
+                    if(/[YMDhms]/.test(pa)){
 
                         // check if pa and following 3 chars match 'YYYY'
                         if(pattern.substr(i, 4) == 'YYYY'){
@@ -184,7 +202,7 @@ KISSY.add(function (S) {
                             if(isNaN(val) || val < 0){
                                 valValidFlag = false;
                             }else{
-                                formatObj[SIGNS[pa]] = val;
+                                formatObj[convertSign(pa)] = val;
                                 (str[j] == '0' || val >= 10) && j++; // fix leading zero auto apply
                                 i++;
                                 continue;
@@ -270,12 +288,11 @@ KISSY.add(function (S) {
                 })
             }
 
-            return pattern.replace('YYYY', formatObj.year)
-                .replace('MM', formatObj.month)
-                .replace('DD', formatObj.date)
-                .replace('hh', formatObj.hour)
-                .replace('mm', formatObj.minute)
-                .replace('ss', formatObj.second);
+            S.each(SIGNS, function(item, key){
+                pattern = pattern.replace(key, formatObj[item]);
+            });
+
+            return pattern;
 
         }
     });
