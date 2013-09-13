@@ -19,6 +19,8 @@ KISSY.add(function (S) {
         return SIGNS[unit+unit] || SIGNS['YYYY'];
     }
 
+    var DEFAULT_PATTERN = 'YYYY-MM-DD hh:mm:ss';
+
     var formatObj = {
         year: 0,
         month: 0,
@@ -132,6 +134,46 @@ KISSY.add(function (S) {
 
     }
 
+    function parseBy(str, timeArr, pattern, isForceLeadingZero){
+
+        var posArr = [];
+
+        // get 'YYYY', 'MM', ... 's position, so that we can know timeArr[i] means year or month or others
+        // returns such as ['year',,,,'month',,'date', ...]
+        S.each(SIGNS, function(item, key){
+            var idx = pattern.indexOf(key);
+            posArr[idx] = item;
+        });
+
+        // walk posArr, set corresponding attributes of formatObj
+        for(var i = 0, j = 0, len = posArr.length; i < len; i++){
+            var attr = posArr[i];
+            if(attr){
+                formatObj[attr] = timeArr[j++];
+            }
+        }
+
+        // check if formatObj is valid date
+        // using date auto convert to compare before & after is equal
+        var toDateObj = formattedToDate(formatObj);
+
+        // KISSY's hidden api: equals[https://github.com/kissyteam/kissy/blob/master/src/seed/src/lang/lang.js]
+        var eq = S.equals;
+        if(eq(dateToFormatted(toDateObj), formatObj) && eq(toDateObj.formatAs(pattern, isForceLeadingZero), str)){
+
+            // two hash object equals, valid date
+            // convert back to date string, compare to original string
+            return toDateObj;
+        }else{
+
+            // parse failure, return false
+            S.log('Date parse error', 'warning');
+            return false;
+        }
+
+    }
+
+
 
     /**
      * mix Date with util functions
@@ -139,13 +181,32 @@ KISSY.add(function (S) {
     S.mix(Date, {
 
 
-        parseStr: function(str/*, pattern*/){
+        parseStr: function(str/*, pattern, isForceLeadingZero*/){
 
             str = S.trim(str);
-            var pattern = arguments[1] || 'YYYY-MM-DD hh:mm:ss';
-            var map = {
+            var pattern = arguments[1];
+            var isForceLeadingZero = arguments[2] || true;
+            var timeArr = str.match(/\d+/g);
 
-            };
+            var result = false;
+
+            if(pattern){
+
+
+            }else{
+
+                pattern = DEFAULT_PATTERN;
+
+                // native parse, with help from native Date constructor
+                result = new Date(str);
+                if(!S.isDate(result) || isNaN(result.getTime())){
+
+                    // native parse fail, parse according to default pattern
+
+
+                }
+
+            }
 
             var yearIdx = pattern.indexOf('YYYY'),
                 monthIdx = pattern.indexOf('MM'),
@@ -155,6 +216,8 @@ KISSY.add(function (S) {
                 secondIdx = pattern.indexOf('ss');
 
 
+
+            return result;
         },
 
         /**
@@ -269,11 +332,11 @@ KISSY.add(function (S) {
 
         /**
          * format the time as the given pattern
-         * @param pattern
+         * @param pattern given pattern
          * @hidden param isLeadingZero for month, date, hour, minute & second, decide whether needs leading zero
          * @returns {string}
          */
-        formatAs: function(pattern){
+        formatAs: function(pattern/*, isLeadingZero*/){
 
             var isLeadingZero = arguments[1] || false;
 
