@@ -19,17 +19,6 @@ KISSY.add(function (S) {
         return SIGNS[unit+unit] || SIGNS['YYYY'];
     }
 
-    var DEFAULT_PATTERN = 'YYYY-MM-DD hh:mm:ss';
-
-    var formatObj = {
-        year: 0,
-        month: 0,
-        date: 0,
-        hour: 0,
-        minute: 0,
-        second: 0
-    };
-
     /**
      * transform given date object to formatted date object
      * @param date
@@ -98,7 +87,7 @@ KISSY.add(function (S) {
     function dateShift(dateObj, interval, direction){
 
         var formatObj = dateToFormatted(dateObj);
-        var gapReg = /^((\d)+[YMDhms]{1})+$/;
+        var gapReg = /^((\d)+[YMDhms]{1}(\s)*)+$/;
 
         // check if interval matches defined pattern
         if(S.isString(interval) && gapReg.test(interval)){
@@ -112,7 +101,7 @@ KISSY.add(function (S) {
                 // arr[0]为单次的全匹配结果
                 var matchedGap = matchArr[0];
                 // filter number and unit
-                var gapValue = parseInt(matchedGap);
+                var gapValue = parseInt(matchedGap, 10);
                 var gapUnit = matchedGap[matchedGap.length - 1];
                 var relKey = convertSign(gapUnit);
 
@@ -134,45 +123,40 @@ KISSY.add(function (S) {
 
     }
 
-    function parseBy(str, timeArr, pattern, isForceLeadingZero){
+    /**
+     * auto parse given str, treat str time seq as year-month-date-hour-minute-second
+     * @param str given str
+     * @returns {*} parsed date obj or false
+     */
+    function autoParse(str){
 
-        var posArr = [];
+        // split numbers from string
+        var timeArr = str.match(/\d+/g);
 
-        // get 'YYYY', 'MM', ... 's position, so that we can know timeArr[i] means year or month or others
-        // returns such as ['year',,,,'month',,'date', ...]
-        S.each(SIGNS, function(item, key){
-            var idx = pattern.indexOf(key);
-            posArr[idx] = item;
-        });
+        // native parse, with help from native Date constructor
+        var result = new Date(str);
+        if(!S.isDate(result) || isNaN(result.getTime())){
 
-        // walk posArr, set corresponding attributes of formatObj
-        for(var i = 0, j = 0, len = posArr.length; i < len; i++){
-            var attr = posArr[i];
-            if(attr){
-                formatObj[attr] = timeArr[j++];
+            // get 'YYYY', 'MM', ... 's position, so that we can know timeArr[i] means year or month or others
+            // returns such as ['year',,,,'month',,'date', ...]
+
+            function transVal(val){
+                return +val || null;
+            }
+
+            result = new Date(transVal(timeArr[0]), transVal(timeArr[1]), transVal(timeArr[2]),
+                transVal(timeArr[3]), transVal(timeArr[4]), transVal(timeArr[5]));
+
+            (timeArr[1] !== undefined) && (result.setMonth(result.getMonth() - 1));
+
+            if(isNaN(result.getTime())){
+                // parse failure, return false
+                return false;
             }
         }
 
-        // check if formatObj is valid date
-        // using date auto convert to compare before & after is equal
-        var toDateObj = formattedToDate(formatObj);
-
-        // KISSY's hidden api: equals[https://github.com/kissyteam/kissy/blob/master/src/seed/src/lang/lang.js]
-        var eq = S.equals;
-        if(eq(dateToFormatted(toDateObj), formatObj) && eq(toDateObj.formatAs(pattern, isForceLeadingZero), str)){
-
-            // two hash object equals, valid date
-            // convert back to date string, compare to original string
-            return toDateObj;
-        }else{
-
-            // parse failure, return false
-            S.log('Date parse error', 'warning');
-            return false;
-        }
-
+        return result;
     }
-
 
 
     /**
@@ -180,119 +164,99 @@ KISSY.add(function (S) {
      */
     S.mix(Date, {
 
-
-        parseStr: function(str/*, pattern, isForceLeadingZero*/){
-
-            str = S.trim(str);
-            var pattern = arguments[1];
-            var isForceLeadingZero = arguments[2] || true;
-            var timeArr = str.match(/\d+/g);
-
-            var result = false;
-
-            if(pattern){
-
-
-            }else{
-
-                pattern = DEFAULT_PATTERN;
-
-                // native parse, with help from native Date constructor
-                result = new Date(str);
-                if(!S.isDate(result) || isNaN(result.getTime())){
-
-                    // native parse fail, parse according to default pattern
-
-
-                }
-
-            }
-
-            var yearIdx = pattern.indexOf('YYYY'),
-                monthIdx = pattern.indexOf('MM'),
-                dateIdx = pattern.indexOf('DD'),
-                hourIdx = pattern.indexOf('hh'),
-                minuteIdx = pattern.indexOf('mm'),
-                secondIdx = pattern.indexOf('ss');
-
-
-
-            return result;
-        },
-
         /**
          * parse given date string by the given pattern
          * ie native support date string rule: http://msdn.microsoft.com/zh-cn/library/ie/ff743760(v=vs.94).aspx
          * @param str given date string
          * @param pattern desired time pattern, e.g.'YYYY-MM-DD hh:mm:ss'
+         * @param isForceLeadingZero(hidden) if requires values in str have leading zero, default true
          */
-        parseBy: function(str, pattern){
+        parseBy: function(str, pattern/*, isForceLeadingZero*/){
 
             str = S.trim(str);
             pattern = S.trim(pattern);
 
-            var valValidFlag = true;
-            var result = true;
+            var formatObj = {
+                year: 0,
+                month: 0,
+                date: 0,
+                hour: 0,
+                minute: 0,
+                second: 0
+            };
+            var isForceLeadingZero = (arguments[2] === false) ? false : true;
+
+            var parseStatus = true;
+            var result = false;
             var errorMsg = 'Date parse failed, please check and retry!';
 
             if(str && pattern){
-                // i pointer for pattern & j pointer for str
-                for(var i = 0, j = 0, len = pattern.length; (i < len) && valValidFlag; i++, j++){
 
-                    var pa = pattern.charAt(i);
-                    var st = str.charAt(j);
+                // if pattern is given, check if matches
+                if(pattern){
+                    // i pointer for pattern & j pointer for str
+                    for(var i = 0, j = 0, len = pattern.length; (i < len) && parseStatus; i++, j++){
 
-                    if(/[YMDhms]/.test(pa)){
+                        var pa = pattern.charAt(i);
+                        var st = str.charAt(j);
 
-                        // check if pa and following 3 chars match 'YYYY'
-                        if(pattern.substr(i, 4) == 'YYYY'){
+                        if(/[YMDhms]/.test(pa)){
 
-                            // deal with year
-                            var year = parseInt(str.substr(j, 4));
-                            if(isNaN(year)){
-                                valValidFlag = false;
-                            }else{
-                                formatObj.year = year;
-                                i += 3;
-                                j += 3;
-                                continue;
+                            // check if pa and following 3 chars match 'YYYY'
+                            if(pattern.substr(i, 4) == 'YYYY'){
+
+                                // deal with year
+                                var year = parseInt(str.substr(j, 4), 10);
+                                if(isNaN(year)){
+                                    parseStatus = false;
+                                }else{
+                                    formatObj.year = year;
+                                    i += 3;
+                                    j += 3;
+                                }
+
+                            }else if(pa == pattern.charAt(i + 1)){
+
+                                // deal with others
+                                var val = parseInt(str.substr(j, 2), 10);
+                                if(isNaN(val) || val < 0){
+                                    parseStatus = false;
+                                }else{
+                                    formatObj[convertSign(pa)] = val;
+
+                                    // process leading zero
+                                    if( val >= 10 || isForceLeadingZero ){
+                                        j++;
+                                    }
+                                    if((val < 10) && ((isForceLeadingZero && st != '0') || (!isForceLeadingZero && st == '0'))){
+                                        parseStatus = false;
+                                    }
+
+                                    i++;
+                                }
+
                             }
 
-                        }else if(pa == pattern.charAt(i + 1)){
-
-                            // deal with others
-                            var val = parseInt(str.substr(j, 2));
-                            if(isNaN(val) || val < 0){
-                                valValidFlag = false;
-                            }else{
-                                formatObj[convertSign(pa)] = val;
-                                (str[j] == '0' || val >= 10) && j++; // fix leading zero auto apply
-                                i++;
-                                continue;
-                            }
-
+                        }else if(pa != st){
+                            parseStatus = false;
                         }
-
                     }
 
-                    // if trans value error || string doesn't match pattern
-                    if(!valValidFlag || pa != st){
-                        S.log(errorMsg);
-                        return false;
-                    }
+                    // check if formatted date obj valid
+                    result = parseStatus && isValidDate(formatObj);
 
+                }else{
+
+                    // no pattern specified, using automatic parse
+                    result = autoParse(str);
                 }
 
-                result = isValidDate(formatObj);
-                if(!result){
-                    S.log(errorMsg);
-                }
-
-                return result;
             }
 
-            S.log(errorMsg);
-            return false;
+            if(!result){
+                S.log(errorMsg, 'warn');
+            }
+            return result;
         }
 
     });
@@ -333,7 +297,7 @@ KISSY.add(function (S) {
         /**
          * format the time as the given pattern
          * @param pattern given pattern
-         * @hidden param isLeadingZero for month, date, hour, minute & second, decide whether needs leading zero
+         * @hidden param isLeadingZero for month, date, hour, minute & second, decide whether needs leading zero, default false
          * @returns {string}
          */
         formatAs: function(pattern/*, isLeadingZero*/){
@@ -345,11 +309,14 @@ KISSY.add(function (S) {
             function fillZero(val){
                 return (val < 10) ? ('0' + val) : val;
             }
-            if(isLeadingZero){
-                S.each(formatObj, function(val, key){
+
+            var i = 0;
+            S.each(formatObj, function(val, key){
+                if((i++ > 2) || isLeadingZero){
+                    // for hour, minute & second, default add leading zero
                     formatObj[key] = fillZero(val);
-                })
-            }
+                }
+            });
 
             S.each(SIGNS, function(item, key){
                 pattern = pattern.replace(key, formatObj[item]);

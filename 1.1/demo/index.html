@@ -45,7 +45,7 @@
         <tr>
             <td class="code">
                 <pre contenteditable="true">
-                    Date.parseBy('2013Year9Month5 1:2-17', 'YYYYYearMMMonthDD hh:mm-ss').toLocaleString();
+                    Date.parseBy('2013年09月05日 01:02:17', 'YYYY年MM月DD日 hh:mm:ss').toLocaleString();
                 </pre>
             </td>
             <td>
@@ -56,9 +56,9 @@
         <tr>
             <td class="code">
                 <pre contenteditable="true">
-                    var t = new Date(2013, 10, 9, 8, 7, 6);
-                    [t.formatAs('YYYY 年 MM 月 DD date hh 点 mm 分'),
-                    t.formatAs('YYYY 年 MM 月 DD date hh 点 mm 分 ss 秒', true)];
+                    var t = new Date(2013, 6, 9, 8, 7, 6);
+                    [t.formatAs('YYYY年MM月DD日 hh:mm'),
+                    t.formatAs('YYYY年MM月DD日 hh:mm:ss', true)];
                 </pre>
             </td>
             <td>
@@ -116,7 +116,7 @@
         $('.btn').on('click', function(){
             var code = $(this).parent('tr').one('pre').html();
             $(this).siblings('output').text(eval(code));
-        })
+        });
 
     })
 </script>
