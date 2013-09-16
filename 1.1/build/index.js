@@ -12,30 +12,18 @@ gallery/RichDate/1.1/index
 KISSY.add('gallery/RichDate/1.1/index',function (S) {
 
     var SIGNS = {
-        'Y': 'year',
-        'M': 'month',
-        'D': 'date',
-        'h': 'hour',
-        'm': 'minute',
-        's': 'second'
+        'YYYY': 'year',
+        'MM': 'month',
+        'DD': 'date',
+        'hh': 'hour',
+        'mm': 'minute',
+        'ss': 'second'
     };
-    var SIGNS_KEYS = [];
-    if(S.keys){
-        SIGNS_KEYS = S.keys(SIGNS);
-    }else{
-        S.each(SIGNS, function(item, idx){
-            SIGNS_KEYS.push(idx);
-        });
-    }
 
-    var formatObj = {
-        year: 0,
-        month: 0,
-        date: 0,
-        hour: 0,
-        minute: 0,
-        second: 0
-    };
+    // process relate mapping for such as 'YYYY->Y->year', 'MM->m->month'
+    function convertSign(unit){
+        return SIGNS[unit+unit] || SIGNS['YYYY'];
+    }
 
     /**
      * transform given date object to formatted date object
@@ -105,7 +93,7 @@ KISSY.add('gallery/RichDate/1.1/index',function (S) {
     function dateShift(dateObj, interval, direction){
 
         var formatObj = dateToFormatted(dateObj);
-        var gapReg = /^((\d)+[YMDhms]{1})+$/;
+        var gapReg = /^((\d)+[YMDhms]{1}(\s)*)+$/;
 
         // check if interval matches defined pattern
         if(S.isString(interval) && gapReg.test(interval)){
@@ -119,15 +107,16 @@ KISSY.add('gallery/RichDate/1.1/index',function (S) {
                 // arr[0]为单次的全匹配结果
                 var matchedGap = matchArr[0];
                 // filter number and unit
-                var gapValue = parseInt(matchedGap);
+                var gapValue = parseInt(matchedGap, 10);
                 var gapUnit = matchedGap[matchedGap.length - 1];
+                var relKey = convertSign(gapUnit);
 
                 if(direction){
                     // true: after
-                    formatObj[SIGNS[gapUnit]] += gapValue;
+                    formatObj[relKey] += gapValue;
                 }else{
                     // false: before
-                    formatObj[SIGNS[gapUnit]] -= gapValue;
+                    formatObj[relKey] -= gapValue;
                 }
 
             }
@@ -140,6 +129,41 @@ KISSY.add('gallery/RichDate/1.1/index',function (S) {
 
     }
 
+    /**
+     * auto parse given str, treat str time seq as year-month-date-hour-minute-second
+     * @param str given str
+     * @returns {*} parsed date obj or false
+     */
+    function autoParse(str){
+
+        // split numbers from string
+        var timeArr = str.match(/\d+/g);
+
+        // native parse, with help from native Date constructor
+        var result = new Date(str);
+        if(!S.isDate(result) || isNaN(result.getTime())){
+
+            // get 'YYYY', 'MM', ... 's position, so that we can know timeArr[i] means year or month or others
+            // returns such as ['year',,,,'month',,'date', ...]
+
+            function transVal(val){
+                return +val || null;
+            }
+
+            result = new Date(transVal(timeArr[0]), transVal(timeArr[1]), transVal(timeArr[2]),
+                transVal(timeArr[3]), transVal(timeArr[4]), transVal(timeArr[5]));
+
+            (timeArr[1] !== undefined) && (result.setMonth(result.getMonth() - 1));
+
+            if(isNaN(result.getTime())){
+                // parse failure, return false
+                return false;
+            }
+        }
+
+        return result;
+    }
+
 
     /**
      * mix Date with util functions
@@ -148,76 +172,97 @@ KISSY.add('gallery/RichDate/1.1/index',function (S) {
 
         /**
          * parse given date string by the given pattern
+         * ie native support date string rule: http://msdn.microsoft.com/zh-cn/library/ie/ff743760(v=vs.94).aspx
          * @param str given date string
          * @param pattern desired time pattern, e.g.'YYYY-MM-DD hh:mm:ss'
+         * @param isForceLeadingZero(hidden) if requires values in str have leading zero, default true
          */
-        parseBy: function(str, pattern){
+        parseBy: function(str, pattern/*, isForceLeadingZero*/){
 
             str = S.trim(str);
             pattern = S.trim(pattern);
 
-            var valValidFlag = true;
-            var result = true;
+            var formatObj = {
+                year: 0,
+                month: 0,
+                date: 0,
+                hour: 0,
+                minute: 0,
+                second: 0
+            };
+            var isForceLeadingZero = (arguments[2] === false) ? false : true;
+
+            var parseStatus = true;
+            var result = false;
             var errorMsg = 'Date parse failed, please check and retry!';
 
             if(str && pattern){
-                // i pointer for pattern & j pointer for str
-                for(var i = 0, j = 0, len = pattern.length; (i < len) && valValidFlag; i++, j++){
 
-                    var pa = pattern.charAt(i);
-                    var st = str.charAt(j);
+                // if pattern is given, check if matches
+                if(pattern){
+                    // i pointer for pattern & j pointer for str
+                    for(var i = 0, j = 0, len = pattern.length; (i < len) && parseStatus; i++, j++){
 
-                    if(S.inArray(pa, SIGNS_KEYS)){
+                        var pa = pattern.charAt(i);
+                        var st = str.charAt(j);
 
-                        // check if pa and following 3 chars match 'YYYY'
-                        if(pattern.substr(i, 4) == 'YYYY'){
+                        if(/[YMDhms]/.test(pa)){
 
-                            // deal with year
-                            var year = parseInt(str.substr(j, 4));
-                            if(isNaN(year)){
-                                valValidFlag = false;
-                            }else{
-                                formatObj.year = year;
-                                i += 3;
-                                j += 3;
-                                continue;
+                            // check if pa and following 3 chars match 'YYYY'
+                            if(pattern.substr(i, 4) == 'YYYY'){
+
+                                // deal with year
+                                var year = parseInt(str.substr(j, 4), 10);
+                                if(isNaN(year)){
+                                    parseStatus = false;
+                                }else{
+                                    formatObj.year = year;
+                                    i += 3;
+                                    j += 3;
+                                }
+
+                            }else if(pa == pattern.charAt(i + 1)){
+
+                                // deal with others
+                                var val = parseInt(str.substr(j, 2), 10);
+                                if(isNaN(val) || val < 0){
+                                    parseStatus = false;
+                                }else{
+                                    formatObj[convertSign(pa)] = val;
+
+                                    // process leading zero
+                                    if( val >= 10 || isForceLeadingZero ){
+                                        j++;
+                                    }
+                                    if((val < 10) && ((isForceLeadingZero && st != '0') || (!isForceLeadingZero && st == '0'))){
+                                        parseStatus = false;
+                                    }
+
+                                    i++;
+                                }
+
                             }
 
-                        }else if(pa == pattern.charAt(i + 1)){
-
-                            // deal with others
-                            var val = parseInt(str.substr(j, 2));
-                            if(isNaN(val) || val < 0){
-                                valValidFlag = false;
-                            }else{
-                                formatObj[SIGNS[pa]] = val;
-                                (str[j] == '0' || val >= 10) && j++; // fix leading zero auto apply
-                                i++;
-                                continue;
-                            }
-
+                        }else if(pa != st){
+                            parseStatus = false;
                         }
-
                     }
 
-                    // if trans value error || string doesn't match pattern
-                    if(!valValidFlag || pa != st){
-                        S.log(errorMsg);
-                        return false;
-                    }
+                    // check if formatted date obj valid
+                    result = parseStatus && isValidDate(formatObj);
 
+                }else{
+
+                    // no pattern specified, using automatic parse
+                    result = autoParse(str);
                 }
 
-                result = isValidDate(formatObj);
-                if(!result){
-                    S.log(errorMsg);
-                }
-
-                return result;
             }
 
-            S.log(errorMsg);
-            return false;
+            if(!result){
+                S.log(errorMsg, 'warn');
+            }
+            return result;
         }
 
     });
@@ -257,11 +302,11 @@ KISSY.add('gallery/RichDate/1.1/index',function (S) {
 
         /**
          * format the time as the given pattern
-         * @param pattern
-         * @hidden param isLeadingZero for month, date, hour, minute & second, decide whether needs leading zero
+         * @param pattern given pattern
+         * @hidden param isLeadingZero for month, date, hour, minute & second, decide whether needs leading zero, default false
          * @returns {string}
          */
-        formatAs: function(pattern){
+        formatAs: function(pattern/*, isLeadingZero*/){
 
             var isLeadingZero = arguments[1] || false;
 
@@ -270,18 +315,20 @@ KISSY.add('gallery/RichDate/1.1/index',function (S) {
             function fillZero(val){
                 return (val < 10) ? ('0' + val) : val;
             }
-            if(isLeadingZero){
-                S.each(formatObj, function(val, key){
-                    formatObj[key] = fillZero(val);
-                })
-            }
 
-            return pattern.replace('YYYY', formatObj.year)
-                .replace('MM', formatObj.month)
-                .replace('DD', formatObj.date)
-                .replace('hh', formatObj.hour)
-                .replace('mm', formatObj.minute)
-                .replace('ss', formatObj.second);
+            var i = 0;
+            S.each(formatObj, function(val, key){
+                if((i++ > 2) || isLeadingZero){
+                    // for hour, minute & second, default add leading zero
+                    formatObj[key] = fillZero(val);
+                }
+            });
+
+            S.each(SIGNS, function(item, key){
+                pattern = pattern.replace(key, formatObj[item]);
+            });
+
+            return pattern;
 
         }
     });
