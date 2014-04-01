@@ -312,6 +312,11 @@ KISSY.add('gallery/RichDate/1.1/index',function (S) {
 
             var formatObj = dateToFormatted(this);
 
+            /**
+             * fill zero for number
+             * @param val {Integer}
+             * @returns {string}
+             */
             function fillZero(val){
                 return (val < 10) ? ('0' + val) : val;
             }
