@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>RichDate</title>
+    <link rel="stylesheet" href="http://cdn.staticfile.org/twitter-bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://docs.kissyui.com/1.4/source/guideline/templates/assets/com-prettify.css">
+    <link rel="stylesheet" href="http://docs.kissyui.com/1.4/source/guideline/templates/assets/com.css">
+    <script src="http://cdn.staticfile.org/jquery/2.1.1-rc2/jquery.min.js"></script>
+    <script src="http://cdn.staticfile.org/twitter-bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="http://cdn.staticfile.org/prettify/r298/prettify.min.js"></script>
+    <script src="http://g.tbcdn.cn/kissy/k/1.4.8/seed-min.js" data-config="{combine:true}"></script>
+  </head>
+  <body data-spy="scroll" data-target=".bs-docs-sidebar">
+    <div id="header"><a href="http://docs.kissyui.com/" class="logo">kissy</a>
+      <nav><a href="http://docs.kissyui.com/1.4/docs/html/coms.html">优秀组件推荐</a></nav>
+    </div>
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3 bs-docs-sidebar">
+          <ul data-spy="affix" data-offset-top="0" class="nav nav-list bs-docs-sidenav"></ul>
+        </div>
+        <div class="span9 bs-docs-content">
+          <h1 data-id="undefined" class="title">RichDate</h1>
+          <p class="author-wrapper"><span>组件有问题？旺旺联系作者：</span><a href="https://github.com/dickeylth" target="_blank" data-name="弘树" class="author"><img src="https://avatars.githubusercontent.com/u/2196373?v=3&amp;s=60" alt="弘树"></a><span class="author-name">弘树</span>
+          </p>
+          <div class="common-link"><a href="../demo/index.html" target="_blank" class="demo">示例</a><a href="https://github.com/kissygalleryteam/RichDate" target="_blank" class="source">源码</a></div>
+          <p class="com-info"><span class="info-label">View</span><span data-com="RichDate" class="J_View">518</span></p>
+          <p class="com-info"><span class="info-label">所属分类</span><a href="http://kpm.taobao.net/list/时间">时间</a><span class="info-label tag-label">组件标签</span><a href="http://kpm.taobao.net/list/tag?tag=Date">Date</a>
+          </p>
+          <p class="com-info"><span class="info-label">kissy版本</span><span>1.4.X</span>
+          </p><h2 id="-">综述</h2>
+<p>RichDate是基于Kissy的对Date对象及原型进行增强的工具组件，方便对时间的操作。</p>
+<ul>
+<li>版本：2.0.0</li>
+<li>作者：hongshu<a href="&#109;&#x61;&#105;&#x6c;&#116;&#x6f;&#58;&#116;&#x69;&#101;&#x68;&#x61;&#110;&#x67;&#46;&#108;&#116;&#x68;&#x40;&#x74;&#x61;&#x6f;&#x62;&#x61;&#x6f;&#x2e;&#x63;&#111;&#109;">&#116;&#x69;&#101;&#x68;&#x61;&#110;&#x67;&#46;&#108;&#116;&#x68;&#x40;&#x74;&#x61;&#x6f;&#x62;&#x61;&#x6f;&#x2e;&#x63;&#111;&#109;</a></li>
+<li>demo：<a href="http://kg.kissyui.com/RichDate/1.0/demo/index.html">http://kg.kissyui.com/RichDate/1.0/demo/index.html</a></li>
+</ul>
+<h2 id="-">约定</h2>
+<h4 id="-parseby-formatas-">时间格式字符串（用在parseBy和formatAs中）</h4>
+<p>按照通用的时间字符来表示： &#39;YYYY-MM-DD hh:mm:ss&#39;分别表示年、月、日、时、分、秒</p>
+<h4 id="-before-after-">时间间隔格式字符串（用在before和after中）</h4>
+<p>与上面类似，Y、M、D、h、m、s分别表示年、月、日、时、分、秒
+e.g：表示2年3个月15天8小时42分36秒：&#39;2Y3M15D8h42m36s&#39;</p>
+<h2 id="-">初始化组件</h2>
+<pre><code>S.use(&#39;kg/RichDate/1.0/index&#39;, function (S, RichDate) {
+     // 无需初始化，加载时自动完成Date的扩展
+})
+</code></pre><h2 id="api-">API说明</h2>
+<ul>
+<li>parseBy: function(string, pattern, isForceLeadingZero)<ul>
+<li>根据指定的pattern对时间字符串string进行解析，返回构造的时间对象</li>
+<li>当解析不成功时返回false，所以也可以用来判断用户提交的时间字符串是否是按照要求的格式输入</li>
+<li>isForceLeadingZero：指定是否强制要求string中数字包含前导零</li>
+<li>调用方式：Date.parseBy(string, pattern, isForceLeadingZero)</li>
+</ul>
+</li>
+</ul>
+<pre><code>    var a = Date.parseBy(&#39;2013年09月05日 01:02:17&#39;, &#39;YYYY年MM月DD日 hh:mm:ss&#39;, true);
+    // a.toLocaleString() = &quot;2013年9月5日 上午1:02:17&quot;
+
+    var a = Date.parseBy(&#39;2013年9月5日 1:2:17&#39;, &#39;YYYY年MM月DD日 hh:mm:ss&#39;);
+    // a = false
+
+    var a = Date.parseBy(&#39;2013年9月5日 1:2:17&#39;, &#39;YYYY年MM月DD日 hh:mm:ss&#39;, false);
+    // a.toLocaleString() = &quot;2013年9月5日 上午1:02:17&quot;
+</code></pre><ul>
+<li><p>formatAs: function(pattern/*, isLeadingZero*/)</p>
+<ul>
+<li>根据指定的pattern对date对象进行格式化输出，返回输出的字符串</li>
+<li>备注：isLeadingZero为可选参数，表示是否输出前导零，默认不输出（对时分秒始终输出前导零）</li>
+<li><p>调用方式：dateObj.formatAs(pattern)</p>
+<p>  var a = new Date(2013, 8, 16);</p>
+<p>  var b = a.formatAs(&#39;YYYY年MM月DD日&#39;);
+  // b = &#39;2013年9月16日&#39;</p>
+<p>  var c = a.formatAs(&#39;YYYY年MM月DD日&#39;, true);
+  // c = &#39;2013年09月16日&#39;</p>
+</li>
+</ul>
+</li>
+<li><p>before: function(interval)</p>
+<ul>
+<li>根据指定的时间间隔字符串interval计算之前的某个时间点，比如&#39;2Y2M&#39;，2年2个月前，返回对应的时间点date对象</li>
+<li><p>调用方式：dateObj.before(interval)</p>
+<p>  var a = new Date(2013, 8, 16, 10, 10, 10);</p>
+<p>  var b = a.before(&#39;4Y 3M 2D 1h 2m&#39;);
+  // b.formatAs(&#39;YYYY年MM月DD日 hh:mm:ss&#39;) = &#39;2009年6月14日 09:08:10&#39;</p>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>after: function(interval)</p>
+<ul>
+<li>与before对应，计算将来的某个时间点</li>
+<li><p>调用方式：dateObj.after(interval)</p>
+<p>  var a = new Date(2013, 8, 16, 10, 10, 10);</p>
+<p>  var b = a.after(&#39;4Y 3M 2D 1h 2m&#39;);
+  // b.formatAs(&#39;YYYY年MM月DD日 hh:mm:ss&#39;) = &#39;2017年12月18日 12.0.02:10&#39;</p>
+</li>
+</ul>
+</li>
+<li><p>isLeapYear: function()</p>
+<ul>
+<li>校验当前date对象是否为闰年，返回boolean</li>
+<li>调用方式：dateObj.isLeapYear()</li>
+</ul>
+</li>
+</ul>
+
+          <div style="display:none;"><script type="text/javascript" src="http://tajs.qq.com/stats?sId=36378479" charset="UTF-8"></script></div>
+          <script src="http://docs.kissyui.com/1.4/source/guideline/templates/assets/com.js"></script>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
