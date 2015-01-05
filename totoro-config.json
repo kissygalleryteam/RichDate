@@ -1,4 +1,4 @@
 {
     "runner":"./test/runner.html",
-    "sync":true
+    "sync":12345
 }
